@@ -34,6 +34,8 @@ function stopTrace() {
 }
 
 // Warning: All apis from Frida 17
+
+let isTrace = false
 function hook() {
     let dlopen_ext = Module.getGlobalExportByName('android_dlopen_ext')
     Interceptor.attach(dlopen_ext, {
@@ -50,8 +52,11 @@ function hook() {
                 let targetModule = Process.findModuleByName(targetSo)
                 Interceptor.attach(targetModule.base.add(0x1234), {
                     onEnter() {
-                        startTrace()
-                        this.tracing = true
+                        if (isTrace === false) {
+                            isTrace = true
+                            startTrace()
+                            this.tracing = true
+                        }
                     },
                     onLeave() {
                         if (this.tracing) {
